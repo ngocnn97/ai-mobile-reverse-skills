@@ -1,42 +1,42 @@
-# 最小复现步骤模板
+# Minimum reproduction steps template
 
-## 目标
+## Target
 
-- 目标接口/逻辑：
-- 目标版本：
-- 目的：
+- Target API/logic:
+- Target version:
+- Purpose:
 
-## 前置条件
+## Preconditions
 
-- 已授权测试环境
-- 已准备样本/抓包数据/必要账号
-- 已开启日志或证据采集
+- Authorized test environment
+- Samples/capture data/necessary accounts have been prepared
+- Log or evidence collection has been turned on
 
-## 步骤
+## Steps
 
-1. 准备输入
-2. 执行正常流程
-3. 执行边界流程
-4. 执行异常流程
-5. 记录返回与差异
+1. Prepare to input
+2. Execute normal procedures
+3. Execute boundary processes
+4. Execute exception process
+5. Record returns and differences
 
-## 观测点
+## Observation point
 
-- 返回码：
-- 响应字段：
-- 日志/堆栈：
-- 是否命中加密/签名逻辑：
+-Return code:
+- Response fields:
+- Log/Stack:
+- Whether encryption/signature logic is hit:
 
-## 证据记录
+## Evidence Record
 
-- 请求摘要：
-- 响应摘要：
-- 代码位置：
-- 截图/日志位置：
+- Request summary:
+- Response summary:
+- Code location:
+- Screenshot/log location:
 
-## 注意事项
+## Notes
 
-- 不做破坏性写操作
-- 不扩大测试范围
-- 不泄露真实敏感数据
+- No destructive write operations
+- No expansion of testing scope
+- Do not leak real sensitive data
 

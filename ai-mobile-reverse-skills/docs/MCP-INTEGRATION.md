@@ -1,215 +1,215 @@
-# MCP 阶段接入规范
+# MCP phase access specification
 
-本文件不是泛泛而谈的“说明”，而是当前 6 阶段主流程的 MCP 接入规范。  
-它只回答 4 个问题：
+This document is not a general "instruction", but the MCP access specification for the current 6-stage main process.
+It only answers 4 questions:
 
-1. 每个阶段优先接什么 MCP
-2. 每个阶段最低需要哪些输入
-3. 每个阶段希望从 MCP 得到什么
-4. MCP 与本地脚本、阶段文档如何配合
+1. Which MCP should be connected first in each stage:
+2. What are the minimum inputs required for each stage:
+3. What do you hope to get from MCP at each stage:
+4. How to cooperate with MCP and local scripts and stage documents
 
-本规范面向已经具备 MCP 接入条件的使用者，重点说明“在当前阶段应如何使用 MCP”，而不是讲解 MCP 服务本身的安装步骤。
+This specification is intended for users who already have MCP access conditions. It focuses on explaining "how to use MCP at the current stage" rather than explaining the installation steps of the MCP service itself.
 
-## 总体原则
+## General principles
 
-### 原则 1：MCP 提供工具能力，不替代阶段结论
+### Principle 1: MCP provides tool capabilities and does not replace stage conclusions.
 
-MCP 的作用是把工具上下文带给 AI，例如：
+The role of MCP is to bring tool context to AI, for example:
 
-- Jadx 类 / 方法 / 字符串检索
-- Burp / Yakit 历史流量
-- IDA / Ghidra 伪代码与交叉引用
+- Jadx class/method/string retrieval
+- Burp / Yakit historical traffic
+- IDA/Ghidra pseudocode and cross-reference
 
-但每个阶段的分析结论仍然由当前阶段文档负责约束。
+However, the analysis conclusions at each stage are still bound by the current stage document.
 
-### 原则 2：默认 AI 主导分析
+### Principle 2: AI-led analysis by default
 
-如果：
+if:
 
-- MCP 已连接
-- 当前阶段材料足够
-- 目录规模可控
+- MCP connected
+- There are enough materials at the current stage
+- Directory size is controllable
 
-则优先直接让 AI 基于 MCP 完成阶段分析。  
-不强制先跑本地脚本。
+Then the priority is to directly let AI complete the stage analysis based on MCP.
+It is not mandatory to run the local script first.
 
-### 原则 3：脚本属于 on-demand 增强
+### Principle 3: Scripts are on-demand enhancements
 
-只有在以下情况才建议跑脚本：
+It is recommended to run the script only under the following circumstances:
 
-- 目录很大
-- 需要批量穷举命中
-- 需要先生成 `raw_*.json`
-- 需要给后续阶段一个稳定的结构化输入
+- The directory is huge
+- Requires batch exhaustive hits
+- Need to generate `raw_*.json` first
+- Need to provide a stable structured input to subsequent stages
 
-### 原则 4：不引入新的主阶段
+### Principle 4: Do not introduce new main stages
 
-本规范严格服从当前 6 个阶段，不新增 `Phase 0 / 1.5 / 2.5` 等额外主流程概念。
+This specification strictly follows the current 6 phases and does not add additional main process concepts such as `Phase 0 / 1.5 / 2.5`.
 
-### 原则 5：`output_dir` 由阶段侧负责创建
+### Principle 5: `output_dir` is created by the stage side
 
-若用户已提供 `{output_dir}` 但目录尚不存在，当前阶段应先创建该目录，再写入标准产物。
+If the user has provided `{output_dir}` but the directory does not yet exist, the directory should be created at the current stage before writing the standard product.
 
-## 阶段接入矩阵
+## Stage access matrix
 
-| 阶段 | 主任务 | 推荐 MCP | 是否必需 | 最低输入 | 推荐输出 |
+| Phase | Main Task | Recommended MCP | Required | Minimum Input | Recommended Output |
 |---|---|---|---|---|---|
-| Phase 1 | APK 静态侦察 | `jadx-mcp` 或无 MCP | 否 | `jadx_mcp=yes` 或 `{target_dir}` | `file_inventory.json` `tech_stack.json` `entrypoints.json` |
-| Phase 2 | 流量与代码对齐 | Burp MCP / Yakit MCP | 建议使用 | `{target_dir}` + 抓包 MCP 或 `{traffic_source}` | `api_endpoints.json` `protocol_map.json` `traffic_alignment.json` |
-| Phase 3 | SO 与 JNI 深度分析 | `ida-mcp` / `ghidra-mcp` | 建议使用 | `{native_analysis_source}` 或 so / 伪代码材料 | `crypto_native_analysis.json` `jni_analysis.json` |
-| Phase 4 | 风险与漏洞筛查 | 无强制 MCP | 否 | 前 1-3 阶段结果 | `vuln_analysis.json` `risk_matrix.json` `secrets_report.json` `jsbridge_analysis.json` |
-| Phase 5 | 最小验证 POC 设计 | Burp MCP / Yakit MCP 可选 | 否 | Phase 4 结果 | `validation_cases.json` `test_plan.md` `repro_steps.md` |
-| Phase 6 | 渗透报告汇总 | 无强制 MCP | 否 | 前 1-5 阶段结果 | `security_report.md` `findings.json` |
+| Phase 1 | APK Static Reconnaissance | `jadx-mcp` or no MCP | No | `jadx_mcp=yes` or `{target_dir}` | `file_inventory.json` `tech_stack.json` `entrypoints.json` |
+| Phase 2 | Traffic and code alignment | Burp MCP / Yakit MCP | Recommended to use | `{target_dir}` + packet capture MCP or `{traffic_source}` | `api_endpoints.json` `protocol_map.json` `traffic_alignment.json` |
+| Phase 3 | In-depth analysis of SO and JNI | `ida-mcp` / `ghidra-mcp` | It is recommended to use | `{native_analysis_source}` or so / pseudocode material | `crypto_native_analysis.json` `jni_analysis.json` |
+| Phase 4 | Risk and Vulnerability Screening | No MCP Enforcement | No | First Phase 1-3 Results | `vuln_analysis.json` `risk_matrix.json` `secrets_report.json` `jsbridge_analysis.json` |
+| Phase 5 | Minimal Validation POC Design | Burp MCP / Yakit MCP Optional | No | Phase 4 Results | `validation_cases.json` `test_plan.md` `repro_steps.md` |
+| Phase 6 | Penetration Report Summary | No MCP Enforcement | No | First Phase 1-5 Results | `security_report.md` `findings.json` |
 
-## Phase 1：APK 静态侦察接入规范
+## Phase 1: APK static reconnaissance access specification
 
-### 目标
+### Target
 
-围绕以下任务完成第一轮静态画像：
+Complete the first round of static portraits around the following tasks:
 
-- Manifest、权限、组件
-- 三方 SDK
-- 硬编码信息
-- 环境对抗逻辑
-- sign / token / encrypt / JNI / WebView 入口
+- Manifest, permissions, components
+- Third-party SDK
+- Hard coded information
+- Environmental confrontation logic
+- sign / token / encrypt / JNI / WebView entry
 
-### 路径 A：使用 `jadx-mcp` 分析 Jadx 当前已打开样本
+### Path A: Use `jadx-mcp` to analyze the currently opened sample of Jadx
 
-适用场景：
+Applicable scenarios:
 
-- 目标样本已经在 Jadx 中打开
-- 希望直接通过 Jadx 视图分析 Manifest、类、方法和资源
-- 需要快速做类 / 方法 / 关键词定位
-- 需要快速定位 URL、加密、请求封装器、native 调用
+- The target sample is already open in Jadx
+- Want to analyze manifests, classes, methods and resources directly through Jadx views
+- Need to quickly do class/method/keyword locating
+- Need to quickly locate URL, encryption, request wrapper, native call
 
-建议最小输入：
+Recommended minimum input:
 
 - `{output_dir}`
 - `jadx_mcp = yes`
 
-补充说明：
+Additional instructions:
 
-- 此模式下，AI 通过 `jadx-mcp` 获取 Jadx 当前已打开样本的 Manifest、类、方法、字符串、资源和调用线索
-- 若 `{output_dir}` 不存在，应先创建后再写入结果
+- In this mode, AI obtains the Manifest, class, method, string, resource and call clue of the currently opened sample of Jadx through `jadx-mcp`
+- If `{output_dir}` does not exist, it should be created first and then write the result.
 
-希望从 MCP 拿到的内容：
+What to expect from MCP:
 
-- 类名 / 方法名 / 包名
-- 关键词命中
-- 调用链片段
-- 可疑字符串和协议路径
+- Class name/method name/package name
+- Keyword hits
+- call chain fragment
+- Suspicious strings and protocol paths
 
-推荐用户触发方式：
+Recommended user trigger methods:
 
 ```text
-我现在连接上了 jadx-mcp，可以使用了。
-目标样本已经在 Jadx 中打开
-帮我进行第一步。
+I'm now connected to jadx-mcp and ready to use.
+The target sample has been opened in Jadx
+Help me with the first step.
 ```
 
-### 路径 B：直接分析本地反编译源码或 APK 解包目录
+### Path B: Directly analyze the local decompiled source code or APK unpacking directory
 
-适用场景：
+Applicable scenarios:
 
-- 已经拿到了脱壳后、反编译后的目录
-- 或者已经拿到了 APK 解包后的源码 / 资源目录
-- 更希望直接用本地目录和编辑器分析
-- 不需要依赖 Jadx 在线上下文
+- Already obtained the unpacked and decompiled directory
+- Or you have obtained the unpacked source code/resource directory of the APK
+- Prefer to analyze directly using local directories and editors
+- No need to rely on Jadx online context
 
-推荐方式：
+Recommended method:
 
-- VS Code 全局检索
-- 本地文本搜索
-- 当 Phase 1 走 `local_source` 时，默认执行：
+- VS Code global search
+- Local text search
+- When Phase 1 uses `local_source`, it is executed by default:
   - `endpoint_extractor.py`
   - `secret_scanner.py`
   - `native_bridge_indexer.py`
   - `env_guard_indexer.py`
-- 当 Phase 1 走 `jadx_mcp_session` 时，不默认执行上述 4 个脚本
+- When Phase 1 runs `jadx_mcp_session`, the above 4 scripts are not executed by default
 
-说明：
+illustrate:
 
-- Phase 1 不强制必须接 `jadx-mcp`
-- 本阶段不把“脱壳”作为职责
+- Phase 1 is not mandatory to connect `jadx-mcp`
+- "Shedding the shell" is not considered a responsibility at this stage
 
-### Phase 1 输出要求
+### Phase 1 output requirements
 
-至少尽量产出：
+At least try to produce:
 
 - `file_inventory.json`
 - `tech_stack.json`
 - `entrypoints.json`
 
-可选补充：
+Optional additions:
 
 - `raw_endpoints.json`
 - `raw_secrets.json`
 - `raw_native_bridges.json`
 - `raw_env_guards.json`
 
-## Phase 2：流量与代码对齐接入规范
+## Phase 2: Traffic and code alignment access specifications
 
-### 目标
+### Target
 
-把抓包数据中的：
+In the packet capture data:
 
 - URL / Path
-- Header / Query / Body 字段
+- Header/Query/Body fields
 - sign / token / data / timestamp / encryptData
 
-映射回代码中的：
+Maps back to code:
 
 - BaseURL
 - Retrofit / OkHttp
-- 请求封装器
-- 参数组装逻辑
-- 签名和加密点
+- Request wrapper
+- Parameter assembly logic
+- Signature and encryption points
 
-### 推荐 MCP
+### Recommended MCP
 
 - Burp MCP
 - Yakit MCP
 
-### 最低输入
+### Minimum input
 
 - `{target_dir}`
-- 且满足以下之一：
-  - 已连接 Burp MCP
-  - 已连接 Yakit MCP
-  - 提供 `{traffic_source}`
+- And meet one of the following:
+- Burp MCP connected
+- Yakit MCP connected
+- Provide `{traffic_source}`
 
-### 希望从 MCP 拿到的内容
+### What to expect from MCP
 
-- 历史请求列表
-- 请求头、参数、响应摘要
-- 登录、支付、资料、上传等场景流量
-- 与认证和签名相关的字段
+- Historical request list
+- Request headers, parameters, response summary
+- Login, payment, data, upload and other scene traffic
+- Fields related to authentication and signature
 
-### 推荐用户触发方式
+### Recommended user trigger method
 
 ```text
-我现在连接上了 Burp MCP。
-抓包结果在 analysis_runs/current_run/traffic/traffic.json
-目标目录是 sample_target/decompiled
-帮我进行第二步。
+I am now connected to the Burp MCP.
+The packet capture results are in analysis_runs/current_run/traffic/traffic.json
+The target directory is sample_target/decompiled
+Help me with step two.
 ```
 
-### 可选脚本增强
+### Optional script enhancements
 
 - `endpoint_extractor.py`
-  - 用于补静态 URL、Path、deeplink、provider 线索
+- Used to fill in static URL, Path, deeplink, provider clues
 - `env_guard_indexer.py`
-  - 用于回看代理、证书校验、抓包检测线索
+- Used to look back at agents, certificate verification, and packet capture detection clues
 
-### Phase 2 输出要求
+### Phase 2 output requirements
 
-至少尽量产出：
+At least try to produce:
 
 - `api_endpoints.json`
 - `protocol_map.json`
 - `traffic_alignment.json`
 
-同时建议补齐以下字段级输出，供后续综合分析阶段直接消费：
+It is also recommended to complete the following field-level output for direct consumption in the subsequent comprehensive analysis stage:
 
 - `field_role`
 - `location`
@@ -221,70 +221,70 @@ MCP 的作用是把工具上下文带给 AI，例如：
 - `replay_relevant`
 - `matched_field_flows`
 
-## Phase 3：SO 与 JNI 深度分析接入规范
+## Phase 3: SO and JNI in-depth analysis access specifications
 
-### 目标
+### Target
 
-围绕以下问题做 native 深挖：
+Do native digging around the following issues:
 
-- JNI 入口在哪里
-- Java 层怎么调用 native
-- sign / encrypt / data / token 相关逻辑是否下沉到 so
-- so 中算法、Key、IV、Salt、参数顺序是什么
-- 是否存在 native 层对抗逻辑
+- Where is the JNI entrance:
+- How to call native in Java layer
+- Whether sign / encrypt / data / token related logic sinks to so
+- What is the order of algorithm, Key, IV, Salt and parameters in so:
+- Whether there is native layer counter logic
 
-### 推荐 MCP
+### Recommended MCP
 
 - `ida-mcp`
 - `ghidra-mcp`
 
-### 最低输入
+### Minimum input
 
-满足以下之一即可：
+Just satisfy one of the following:
 
-- 已连接 `ida-mcp`
-- 已连接 `ghidra-mcp`
-- 提供 `{native_analysis_source}`
-- 提供可直接分析的 so / JNI 伪代码
+- Connected `ida-mcp`
+- `ghidra-mcp` is connected
+- Provide `{native_analysis_source}`
+- Provides so/JNI pseudocode that can be directly analyzed
 
-### 希望从 MCP 拿到的内容
+### What to expect from MCP
 
-- JNI 符号与入口
-- 交叉引用
-- 关键函数伪代码
-- `RegisterNatives`、`System.loadLibrary` 关系
-- 关键字符串与常量
+- JNI symbols and entries
+- Cross-reference
+- Pseudocode of key functions
+- `RegisterNatives`, `System.loadLibrary` relationship
+- Key strings and constants
 
-### 推荐用户触发方式
-
-```text
-我现在连接上了 ida-mcp，可以使用了。
-IDA 工程在 sample_target/native/sample.i64
-帮我进行第三步。
-```
-
-或：
+### Recommended user trigger method
 
 ```text
-我现在连接上了 ghidra-mcp，可以使用了。
-Ghidra 工程在 sample_target/native/sample.gpr
-帮我进行第三步。
+I'm now connected to ida-mcp and ready to use.
+The IDA project is in sample_target/native/sample.i64
+Help me with step three.
 ```
 
-### 可选脚本增强
+or:
+
+```text
+I now have ghidra-mcp connected and ready to use.
+The Ghidra project is in sample_target/native/sample.gpr
+Help me with step three.
+```
+
+### Optional script enhancements
 
 - `native_bridge_indexer.py`
-  - 用于补 JNI、WebView、JSBridge、桥接面线索
-  - 仅作为入口补证据，不替代 `ida-mcp` / `ghidra-mcp` 的 so 分析
+- Used to supplement JNI, WebView, JSBridge, and bridge API clues
+- It is only used as entry supplementary evidence and does not replace the so analysis of `ida-mcp` / `ghidra-mcp`
 
-### Phase 3 输出要求
+### Phase 3 output requirements
 
-至少尽量产出：
+At least try to produce:
 
 - `crypto_native_analysis.json`
 - `jni_analysis.json`
 
-同时建议补齐以下还原字段，供 Phase 4 直接消费：
+It is also recommended to complete the following restoration fields for direct consumption in Phase 4:
 
 - `java_entry`
 - `native_entry`
@@ -298,42 +298,42 @@ Ghidra 工程在 sample_target/native/sample.gpr
 - `output_encoding`
 - `restoration_confidence`
 
-## Phase 4：弱加密与高风险漏洞筛查接入规范
+## Phase 4: Weak encryption and high-risk vulnerability screening access specifications
 
-### 目标
+### Target
 
-基于前 1-3 步结果形成风险结论，包括：
+Form risk conclusions based on the results of the first 1-3 steps, including:
 
-- 弱加密
-- 硬编码密钥
-- 认证授权问题
-- 数据安全问题
-- 业务逻辑问题
-- 组件与 Deeplink 风险
+- Weak encryption
+- Hardcoded keys
+- Authentication and authorization issues
+- Data security issues
+-Business logic issues
+- Components and Deeplink Risks
 
-### MCP 策略
+### MCP Policy
 
-- 无强制 MCP
-- 必要时可以回调：
+- No mandatory MCP
+- Callback when necessary:
   - `jadx-mcp`
   - `ida-mcp`
   - `ghidra-mcp`
 
-### 最低输入
+### Minimum input
 
-前 1-3 阶段结果至少具备一部分。
+The first 1-3 stages result at least partially.
 
-### 可选脚本增强
+### Optional script enhancements
 
 - `secret_scanner.py`
 - `env_guard_indexer.py`
 
-### Phase 4 输出要求
+### Phase 4 output requirements
 
 - `vuln_analysis.json`
 - `risk_matrix.json`
 
-建议在 `vuln_analysis.json` 中进一步固化以下结构：
+It is recommended to further solidify the following structure in `vuln_analysis.json`:
 
 - `crypto_findings`
 - `signature_findings`
@@ -343,118 +343,118 @@ Ghidra 工程在 sample_target/native/sample.gpr
 - `source_phase_3_fields`
 - `gap_filled_by_phase4`
 
-## Phase 5：最小验证 POC 设计接入规范
+## Phase 5: Minimum verification POC design access specification
 
-### 目标
+### Target
 
-基于 Phase 4 结果做最小影响验证设计，包括：
+Minimum impact verification design based on Phase 4 results, including:
 
-- data 加解密验证
-- 签名绕过验证
-- 越权访问验证
-- 参数篡改验证
-- 未授权访问验证
+- data encryption and decryption verification
+- Signature bypass verification
+- Verification of unauthorized access
+- Parameter tampering verification
+- Unauthorized access verification
 
-### MCP 策略
+### MCP Policy
 
-- Burp MCP / Yakit MCP 可选
-- 主要用于查看历史请求、回放授权测试流量和整理验证样本
+- Burp MCP / Yakit MCP optional
+- Mainly used to view historical requests, play back authorization test traffic and organize verification samples
 
-### 最低输入
+### Minimum input
 
-- `vuln_analysis.json` 或 `risk_matrix.json`
+- `vuln_analysis.json` or `risk_matrix.json`
 
-### 输出要求
+### Output requirements
 
 - `validation_cases.json`
 - `test_plan.md`
 - `repro_steps.md`
 - `poc_scripts_index.json`
 
-如材料完整，还应尽量生成：
+If the materials are complete, try to generate:
 
 - `pocs/{vuln_id}/validate_request.py`
 - `pocs/{vuln_id}/runtime_observe.js`
 - `pocs/{vuln_id}/README.md`
 
-## Phase 6：渗透报告汇总接入规范
+## Phase 6: Penetration report summary access specifications
 
-### 目标
+### Target
 
-把 1-5 步产物汇总成可交付报告。
+Summarize steps 1-5 into deliverable reports.
 
-### MCP 策略
+### MCP Policy
 
-- 无强制 MCP
-- 如需补证据，可回调前序 MCP，但不改变本阶段以“汇总与交付”为主的定位
+- No mandatory MCP
+- If you need to supplement evidence, you can call back the previous-stage MCP, but it does not change the locating of this stage as "summarization and delivery".
 
-### 最低输入
+### Minimum input
 
-前 1-5 阶段结果至少具备一部分。
+The first 1-5 stages result in at least some of them.
 
-### 输出要求
+### Output requirements
 
 - `security_report.md`
 - `findings.json`
-- 配套全量附件
+- Comes with full range of accessories
 
-## 可选补充 MCP
+## Optional supplementary MCP
 
 ### Chrome MCP / Playwright MCP
 
-不作为 6 阶段主流程的强制接入项，但可用于：
+It is not a mandatory access item for the 6-stage main process, but can be used for:
 
-- 登录流程自动化
-- Token 获取路径观察
-- H5 页面行为联动
-- 浏览器端辅助验证
+- Automate the login process
+- Token acquisition path observation
+- H5 page behavior linkage
+- Browser-side auxiliary verification
 
 ### UniDbg MCP
 
-不作为主流程必选项，但可用于：
+It is not required for the main process, but can be used for:
 
-- 静态无法还原的 native 分支
-- 寄存器 / 内存 / 断点辅助判断
+- Static native branch that cannot be restored
+- Register/memory/breakpoint auxiliary judgment
 
-## MCP 与脚本层的关系
+## The relationship between MCP and script layer
 
-两者不是替代关系，而是分工关系：
+The relationship between the two is not a substitution, but a division of labor:
 
-- MCP：提供工具上下文与交互能力
-- 阶段文档：规定方法论、步骤、输出要求
-- 本地脚本：做高覆盖率批量命中和结构化索引
+- MCP: Provide tool context and interaction capabilities
+- Stage documents: stipulates methodology, steps, and output requirements
+- Local script: do high coverage batch hits and structured indexing
 
-对应关系如下：
+The corresponding relationship is as follows:
 
 - `endpoint_extractor.py`
-  - 适合补 Phase 1、Phase 2 的接口与路径线索
+- Suitable for supplementing APIs and path clues for Phase 1 and Phase 2
 - `secret_scanner.py`
-  - 适合补 Phase 1、Phase 4 的敏感信息线索
+- Suitable for supplementing sensitive information clues in Phase 1 and Phase 4
 - `native_bridge_indexer.py`
-  - 适合补 Phase 1、Phase 3 的 JNI / bridge 线索
+- Suitable for supplementing JNI/bridge clues for Phase 1 and Phase 3
 - `env_guard_indexer.py`
-  - 适合补 Phase 1 的环境对抗线索
+- Suitable for supplementing Phase 1 environmental confrontation clues
 
-## 推荐最小闭环
+## Recommended minimum closed loop
 
-如果先做一个最小可用版，建议如下：
+If you want to make a minimum usable version first, the suggestions are as follows:
 
-1. Phase 1：`jadx-mcp` 或本地目录分析
-2. Phase 2：Burp MCP / Yakit MCP
-3. Phase 3：`ida-mcp` / `ghidra-mcp`
-4. Phase 4-6：基于前序产物完成风险判断、POC 设计和报告交付
+1. Phase 1: `jadx-mcp` or local directory analysis
+2. Phase 2:Burp MCP / Yakit MCP
+3. Phase 3:`ida-mcp` / `ghidra-mcp`
+4. Phase 4-6: Complete risk judgment, POC design and report delivery based on previous products
 
-其中，Phase 4 除主输出外，还应尽量将 `raw_secrets.json`、WebView / JSBridge 线索整理为 `secrets_report.json`、`jsbridge_analysis.json`，供 Phase 6 直接消费。
+Among them, in addition to the main output, Phase 4 should also try to organize `raw_secrets.json` and WebView / JSBridge clues into `secrets_report.json` and `jsbridge_analysis.json` for direct consumption by Phase 6.
 
-若 token 紧张、目录过大，再补本地脚本索引。
+If the token is tight and the directory is too large, add a local script index.
 
-## 当前统一上下文变量
+## Current unified context variables
 
 ```text
-{target_name}      目标 App 名称
-{apk_path}         APK 文件路径，可选，仅用于补充样本元信息
-{target_dir}       脱壳后、反编译后的目录
-{traffic_source}   Burp / Yakit 导出结果或本地抓包整理文件
-{native_analysis_source}  IDA / Ghidra 工程、so 样本或伪代码材料
-{output_dir}       输出目录
+{target_name} Target App name
+{apk_path} APK file path, optional, only used to supplement sample meta information
+{target_dir} Directory after unpacking and decompilation
+{traffic_source} Burp / Yakit export results or local capture files
+{native_analysis_source} IDA / Ghidra project, so sample or pseudocode material
+{output_dir} output directory
 ```

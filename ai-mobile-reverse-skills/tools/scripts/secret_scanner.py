@@ -115,7 +115,7 @@ SCAN_RULES = [
         "wechat_mchid",
         re.compile(r"(?i)(?:mch_?id|merchant_?id)\s*[:=]\s*['\"]([0-9]{7,12})['\"]"),
         "High",
-        ["pay", "wechat", "wxpay", "payment", "微信支付"],
+        ["pay", "wechat", "wxpay", "payment", "WeChat Pay"],
         1,
     ),
     (
@@ -123,7 +123,7 @@ SCAN_RULES = [
         "wechat_pay_key",
         re.compile(r"(?i)(?:mch_?key|pay_?key|api_?key)\s*[:=]\s*['\"]([A-Za-z0-9]{24,64})['\"]"),
         "Critical",
-        ["pay", "wechat", "wxpay", "payment", "微信支付"],
+        ["pay", "wechat", "wxpay", "payment", "WeChat Pay"],
         1,
     ),
     (
@@ -401,7 +401,7 @@ SCAN_RULES = [
         "wecom_corpsecret",
         re.compile(r"(?i)(?:corp[_-]?secret|wecom[_-]?secret)\s*[:=]\s*['\"]([^'\"\n]{16,})['\"]"),
         "High",
-        ["wecom", "wework", "企微", "企业微信"],
+        ["wecom", "wework", "WeCom", "Enterprise WeChat"],
         1,
     ),
     (
@@ -409,7 +409,7 @@ SCAN_RULES = [
         "alipay_appid",
         re.compile(r"\b2088[0-9]{12}\b"),
         "Medium",
-        ["alipay", "支付宝", "payment", "pay"],
+        ["alipay", "Alipay", "payment", "pay"],
         0,
     ),
     (
@@ -569,7 +569,7 @@ SCAN_RULES = [
     (
         "todo_security",
         "todo_or_fixme",
-        re.compile(r"(?i)(?:TODO|FIXME|HACK|XXX).*?(?:security|auth|password|secret|encrypt|签名|加密|权限|认证)"),
+        re.compile(r"(?i)(?:TODO|FIXME|HACK|XXX).*?(?:security|auth|password|secret|encrypt|signature|encryption|permission|authentication)"),
         "Low",
         None,
         0,
@@ -727,7 +727,7 @@ def scan_file(path: Path, rel_path: str, max_size_kb: int) -> list[dict]:
                 "value": rel_path,
                 "masked_value": rel_path,
                 "line": 0,
-                "context": f"发现 {ext} 文件",
+                "context": f"{ext} file found",
                 "confidence": "high",
                 "is_placeholder": False,
                 "source_file": rel_path,

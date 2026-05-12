@@ -1,58 +1,58 @@
 # State Model
 
-本文档定义 `analysis_state.json` 的最小状态模型，用于支撑 `ai-mobile-reverse-skills` 的逐阶段步进模式与自动链模式。
+This document defines the minimum state model of `analysis_state.json`, which is used to support the step-by-step mode and automatic chain mode of `ai-mobile-reverse-skills`.
 
-## 文件位置
+## File location
 
-状态文件默认位于：
+The status file is located by default at:
 
 - `{output_dir}/analysis_state.json`
 
-其中 `{output_dir}` 采用统一输出根目录约定，例如：
+Among them, `{output_dir}` adopts the unified output root directory convention, for example:
 
 - `analysis_runs/current_run`
 
-## 文件职责
+## File Responsibilities
 
-`analysis_state.json` 不保存具体漏洞结论或协议分析结果，而负责记录当前任务的流程状态，包括：
+`analysis_state.json` does not save specific vulnerability conclusions or protocol analysis results, but is responsible for recording the process status of the current task, including:
 
-- 当前目标与路径上下文
-- 当前运行模式
-- 当前执行阶段
-- 各阶段状态
-- 人工准备状态
-- Native 运行时配置
-- 各阶段产物位置
+- Current target and path context
+- Current operating mode
+- Current execution phase
+-Status of each stage
+- Manual readiness status
+- Native runtime configuration
+- Location of products at each stage
 
-## 首次使用前的前置配置
+## Pre-configuration before first use
 
-若流程需要自动收敛 so 并通过 `ghidra_target_loader.py` 导入 Ghidra，则建议在任务开始前至少确认：
+If the process needs to automatically converge so and import Ghidra through `ghidra_target_loader.py`, it is recommended to at least confirm before starting the task:
 
 - `ghidra_root`
 
-其中，`ghidra_root` 属于不能稳定自动猜测的本机路径，建议用户首次使用前手工确认一次。例如：
+Among them, `ghidra_root` is a local path that cannot be stably and automatically guessed. It is recommended that users confirm it manually before using it for the first time. For example:
 
 - `sample_tools/Ghidra/ghidra_x.y.z_PUBLIC`
 
-后续流程默认继承，不应在每次进入第三阶段时重复要求填写。
+Subsequent processes will be inherited by default and should not be required repeatedly every time you enter the third stage.
 
-同时，SO 自动化链路还需要同时具备：
+At the same time, the SO automation link also needs to have:
 
-- 反编译代码上下文：用于定位 Java 调用、JNI 入口和业务字段关系
-- APK 解包源码上下文：必须存在 APK 解包目录，且能访问其中的 `lib/<abi>/*.so`
+- Decompiled code context: used to locate Java calls, JNI entries and business field relationships
+- APK unpacking source code context: the APK unpacking directory must exist and `lib/<abi>/*.so` in it must be accessible
 
-若缺少 APK 解包源码目录，`selected_native_target.json` 只能作为候选判断依据，不能进入“自动化拉取 so”链路。用户显式提供的 `.so` 可以作为 native 分析材料使用，但不属于自动化拉取。
+If the APK unpacking source code directory is missing, `selected_native_target.json` can only be used as a candidate basis and cannot enter the "automated pulling so" link. `.so` provided explicitly by the user can be used as native analysis material, but is not automatically pulled.
 
-其余 Native 运行时参数，例如：
+The rest of the Native runtime parameters, such as:
 
 - `ghidra_project_dir`
 - `ghidra_project_name`
 - `so_search_roots`
 - `preferred_abis`
 
-默认应由系统结合 `{output_dir}`、样本目录结构、目标 so 分布和默认 ABI 策略自动推导。
+The default should be automatically derived by the system using a combination of `{output_dir}`, the sample directory structure, the target .so distribution and the default ABI policy.
 
-## 最小 JSON 模板
+## Minimal JSON template
 
 ```json
 {
@@ -148,9 +148,9 @@
 }
 ```
 
-## 阶段状态字段
+## Stage status field
 
-推荐统一使用以下状态值：
+It is recommended to use the following status values ​​uniformly:
 
 - `pending`
 - `running`
@@ -159,30 +159,30 @@
 - `blocked`
 - `failed`
 
-### 含义
+### Meaning
 
-- `pending`：阶段尚未开始
-- `running`：阶段正在执行
-- `waiting_review`：阶段已执行完，等待人工确认
-- `completed`：阶段已完成，可供下游消费
-- `blocked`：缺少材料、条件不满足或人工要求暂停
-- `failed`：执行报错或结果不可用
+- `pending`: The stage has not started yet
+- `running`: The stage is executing
+- `waiting_review`: The stage has been executed and is waiting for manual confirmation
+- `completed`: The stage has been completed and is available for downstream consumption
+- `blocked`: lack of materials, unsatisfied conditions or manual request suspension
+- `failed`: Execution error or result unavailable
 
-## 模式行为
+## Pattern behavior
 
 ### `step_by_step`
 
-- 每个阶段执行结束后默认写为 `waiting_review`
-- 人工确认后再写为 `completed`
-- 总控仅在人工确认后进入下一阶段
+- After each stage is executed, it is written as `waiting_review` by default
+- After manual confirmation, write it as `completed`
+- The orchestrator will only enter the next stage after manual confirmation.
 
 ### `auto_chain`
 
-- 阶段完成并满足切换条件后，当前阶段写为 `completed`
-- 总控自动更新 `current_phase` 并进入下一阶段
-- 若切换条件不满足，则写为 `blocked`
+- After the stage is completed and the switching conditions are met, the current stage is written as `completed`
+- The orchestrator automatically updates `current_phase` and enters the next phase
+- If the switching condition is not met, it is written as `blocked`
 
-## Native 运行时配置字段
+## Native runtime configuration fields
 
 ### `native_runtime.native_mcp`
 
@@ -194,83 +194,83 @@
 
 - `auto`
 - `selected_target_json`
-- 显式 so / IDA / Ghidra 工程路径，仅作为用户指定的 native 分析材料，不代表自动化拉取 so
+- Explicit so/IDA/Ghidra project path is only used as user-specified native analysis material and does not represent automated pulling of so
 
 ### `native_runtime.ghidra_root`
 
-Ghidra 安装根目录。  
-这是自动导入 so 到 Ghidra 时必须提前确认的本机路径，默认不应由系统凭空猜测。
+Ghidra installation root directory.
+This is a native path that must be confirmed in advance when automatically importing so into Ghidra. The default should not be guessed by the system.
 
 ### `native_runtime.ghidra_project_dir`
 
-Ghidra 项目目录。若未单独指定，应默认放在：
+Ghidra project directory. If not specified separately, it should be placed by default:
 
 - `analysis_runs/current_run/ghidra_projects`
 
 ### `native_runtime.ghidra_project_name`
 
-Ghidra 项目名。若未单独指定，应默认按当前任务名或输出目录名自动生成。
+Ghidra project name. If not specified separately, it should be automatically generated based on the current task name or output directory name by default.
 
 ### `native_runtime.so_search_roots`
 
-用于自动查找 so 的根目录列表。若未单独指定，应优先根据样本解包目录自动推导，通常指向解包目录下的 `lib/`。
+List of root directories used to automatically find so. If not specified separately, it should be automatically deduced based on the sample unpacking directory first, usually pointing to `lib/` in the unpacking directory.
 
 ### `native_runtime.preferred_abis`
 
-用于在同名 so 存在多份时确定优先顺序。若未单独指定，默认可按以下顺序处理：
+Used to determine priority when there are multiple copies of so with the same name. If not specified separately, the default processing is in the following order:
 
 - `arm64-v8a`
 - `armeabi-v7a`
 
-## 自动链切换条件
+## Automatic chain switching conditions
 
-### 链路 A
+### Link A
 
-目标：
+Target:
 
-- Phase 1 人工确认
-- Phase 2-6 自动推进
+- Phase 1 manual confirmation
+- Phase 2-6 automatic advancement
 
-最小条件：
+Minimum conditions:
 
 - `phase_1.status = completed`
 - `manual_ready.traffic_ready = true`
-- `manual_ready.mcp_burp_ready = true` 或 `{traffic_source}` 已提供
-- `manual_ready.mcp_native_ready = true` 或 `{native_analysis_source}` 已提供
+- `manual_ready.mcp_burp_ready = true` or `{traffic_source}` provided
+- `manual_ready.mcp_native_ready = true` or `{native_analysis_source}` provided
 
-### 链路 B
+### Link B
 
-目标：
+Target:
 
-- Phase 1-3 人工确认
-- Phase 4-6 自动推进
+- Phase 1-3 manual confirmation
+- Phase 4-6 automatic advancement
 
-最小条件：
+Minimum conditions:
 
 - `phase_1.status = completed`
 - `phase_2.status = completed`
 - `phase_3.status = completed`
 
-### 链路 C
+### Link C
 
-目标：
+Target:
 
-- 从 Phase 1 开始持续自动推进到 Phase 6
+- Starting from Phase 1 and continuing to automatically advance to Phase 6
 
-最小条件：
+Minimum conditions:
 
-- `analysis_mode = local_source` 或 `manual_ready.mcp_jadx_ready = true`
+- `analysis_mode = local_source` or `manual_ready.mcp_jadx_ready = true`
 - `manual_ready.traffic_ready = true`
-- `manual_ready.mcp_burp_ready = true` 或 `{traffic_source}` 已提供
-- `manual_ready.mcp_native_ready = true` 或 `{native_analysis_source}` 已提供
+- `manual_ready.mcp_burp_ready = true` or `{traffic_source}` provided
+- `manual_ready.mcp_native_ready = true` or `{native_analysis_source}` provided
 - `phase_1.status = completed`
 
-## 更新职责
+## Update Responsibilities
 
-职责划分如下：
+The responsibilities are divided as follows:
 
-- `agents/*.md`：负责各阶段分析执行
-- `analysis_state.json`：负责记录流程状态
-- `SKILL.md` 总控：负责创建与更新状态文件
+- `agents/*.md`: Responsible for analysis and execution of each stage
+- `analysis_state.json`: Responsible for recording process status
+- `SKILL.md` Master Control: Responsible for creating and updating status files
 
-正常使用时，测试人员不需要手工维护本文件。它应由流程在阶段开始、结束、挂起、阻塞或失败时自动更新。
+During normal use, testers do not need to manually maintain this file. It should be automatically updated by the process when a stage starts, ends, hangs, blocks, or fails.

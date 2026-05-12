@@ -1,38 +1,38 @@
-# AI Mobile Reverse Skills 用户快速说明
-这是一套面向移动安全分析的 6 阶段工作流，用来把 APK 静态侦察、流量与代码对齐、SO / JNI 深度分析、漏洞收口、验证设计和报告交付组织成一条可逐步执行、也可自动推进的流程。
+#AI Mobile Reverse Skills User Quick Instructions
+This is a 6-stage workflow for mobile security analysis, which is used to organize APK static reconnaissance, traffic and code alignment, SO/JNI in-depth analysis, vulnerability closure, verification design and report delivery into a process that can be executed step by step or automatically.
 
-## 先记住两件事
-1. 所有模式都从第一步开始，不会跳过 Phase 1。
-2. 运行方式只有两类：`step_by_step` 和 `auto_chain`。
+## Remember two things first
+1. All modes start from the first step and Phase 1 will not be skipped.
+2. There are only two types of running modes: `step_by_step` and `auto_chain`.
 
-## 开始前你至少要准备什么
-- 反编译目录，或已打开的 `jadx-mcp` 会话
-- 一个统一的 `output_dir`
-- 如果要做流量对齐：
-  - 已准备好的抓包结果，或已接通 `burp-mcp` / `yakit-mcp`
-- 如果要做 Ghidra 自动导入：
-  - 已提前确认 `ghidra_root`
-  - 已具备 APK 解包源码目录，并且目录中存在 `lib/<abi>/*.so`
+## What should you at least prepare before starting:
+- Decompile directory, or an open `jadx-mcp` session
+- a unified `output_dir`
+- If you want to do traffic alignment:
+- Packet capture results have been prepared, or `burp-mcp` / `yakit-mcp` has been connected
+- If you want to automatically import Ghidra:
+- Confirmed in advance `ghidra_root`
+- Already have the APK unpacking source code directory, and `lib/<abi>/*.so` exists in the directory
 
-## 第一步：先选模式
-逐阶段步进模式：
+## Step 1: Select the mode first
+Stage-by-stage stepping mode:
 ```text
 run_mode: step_by_step
 ```
-适合每一步都想人工复核、想随时停下来调整分析重点的场景。
+It is suitable for scenarios where you want to manually review every step and want to stop and adjust the focus of analysis at any time.
 
-自动链模式：
+Automatic chain mode:
 ```text
 run_mode: auto_chain
 auto_chain_mode: A/B/C
 ```
-含义：
-- `A`：第一阶段后人工准备抓包和 MCP，第二阶段起自动推进到第六阶段
-- `B`：前 1-3 阶段人工确认，第四阶段起自动推进到第六阶段
-- `C`：从第一阶段开始尽量全流程自动推进，适合前置准备已完成的场景
+meaning:
+- `A`: Manually prepare packet capture and MCP after the first stage, and automatically advance to the sixth stage from the second stage.
+- `B`: Manual confirmation in the first 1-3 stages, automatically advanced to the sixth stage from the fourth stage onwards
+- `C`: Try to advance the entire process automatically from the first stage, suitable for scenarios where pre-preparation has been completed
 
-## 第二步：再进入第一阶段
-无论哪种模式，后面都先发第一步模板：
+## Step 2: Enter the first stage again
+No matter which mode, the first step template will be sent first:
 ```text
 step: 1
 analysis_mode: local_source/jadx_mcp_session
@@ -40,28 +40,28 @@ target_dir: sample_target/decompiled
 output_dir: analysis_runs/current_run
 jadx_mcp: yes/no
 ```
-参数说明：
+Parameter description:
 - `analysis_mode`
-  - `local_source`：分析本地反编译目录
-  - `jadx_mcp_session`：直接消费 `jadx-mcp` 当前会话
-- `target_dir`：反编译后的主分析目录
-- `output_dir`：统一输出目录，后续阶段默认继承
-- `jadx_mcp`：当前是否已接好 `jadx-mcp`
+- `local_source`: analyze the local decompilation directory
+- `jadx_mcp_session`: Directly consume the `jadx-mcp` current session
+- `target_dir`: main analysis directory after decompilation
+- `output_dir`: unified output directory, inherited by default in subsequent stages
+- `jadx_mcp`: Whether `jadx-mcp` is currently connected
 
-## 典型启动顺序
-最常见的启动方式是两段式：
+## Typical startup sequence
+The most common startup method is two-stage:
 
-1. 先发模式：
+1. First-mover mode:
 ```text
 run_mode: step_by_step
 ```
-或：
+or:
 ```text
 run_mode: auto_chain
 auto_chain_mode: A/B/C
 ```
 
-2. 再发第一步模板：
+2. Send the first step template again:
 ```text
 step: 1
 analysis_mode: local_source/jadx_mcp_session
@@ -70,21 +70,21 @@ output_dir: analysis_runs/current_run
 jadx_mcp: yes/no
 ```
 
-这样系统就能知道：
-- 你想怎么跑
-- 从哪里读材料
-- 结果往哪里写
+This way the system will know:
+- How do you want to run:
+- Where to read material
+- Where to write the result:
 
-## 这 6 个阶段分别做什么
-1. `Phase 1`：APK 静态侦察、技术栈识别、环境检测、可疑 so 初筛
-2. `Phase 2`：流量与代码对齐，收敛关键字段和目标 so
-3. `Phase 3`：SO / JNI 深度分析，具备 APK 解包源码时可自动拉取 so 并导入 Ghidra
-4. `Phase 4`：加密链路与高风险问题综合收口
-5. `Phase 5`：最小验证思路与 POC 模板设计
-6. `Phase 6`：汇总结果并生成标准化报告
+## What do these 6 stages do:
+1. `Phase 1`: APK static reconnaissance, technology stack identification, environment detection, suspicious so preliminary screening
+2. `Phase 2`: Align traffic with code, converge on key fields and goals so
+3. `Phase 3`: In-depth analysis of SO / JNI, with APK unpacking source code, it can automatically pull so and import it into Ghidra
+4. `Phase 4`: Comprehensive settlement of encrypted links and high-risk issues
+5. `Phase 5`: Minimal verification ideas and POC template design
+6. `Phase 6`: Aggregate results and generate standardized reports
 
-## 结果写到哪里
-默认写到：
+## Where to write the result
+By default it reads:
 ```text
 {output_dir}/
 ├── step1/
@@ -94,104 +94,104 @@ jadx_mcp: yes/no
 ├── step5/
 └── step6/
 ```
-另外会有：
+There will also be:
 ```text
 {output_dir}/analysis_state.json
 ```
-它不是分析结果文件，而是流程状态文件，用来记录：
-- 当前运行模式
-- 当前做到第几步
-- 哪一步已完成
-- 哪一步等待确认
-- 哪一步被阻塞
+It is not an analysis result file, but a process status file, used to record:
+- Current operating mode
+- What steps are you currently on:
+- Which step has been completed
+- Which step awaits confirmation
+- which step is blocked
 
-如果后面中断了，通常也是先看它，再决定从哪一步继续。
+If there is an interruption later, it is usually necessary to look at it first and then decide which step to continue from.
 
-## 脚本什么时候会自动用到
-Phase 1 如果是：
+## When will the script be automatically used:
+Phase 1 if:
 ```text
 analysis_mode: local_source
 ```
-默认会执行这 4 个脚本：
+These 4 scripts are executed by default:
 - `endpoint_extractor.py`
 - `secret_scanner.py`
 - `native_bridge_indexer.py`
 - `env_guard_indexer.py`
 
-Phase 1 如果是：
+Phase 1 if:
 ```text
 analysis_mode: jadx_mcp_session
 ```
-则不默认执行这 4 个脚本，优先直接使用 `jadx-mcp` 上下文。
+These four scripts will not be executed by default, and the `jadx-mcp` context will be used directly first.
 
-Phase 2 / 3 还会自动用到：
+Phase 2 / 3 will also automatically use:
 - `resolve_native_target.py`
-  - 第二阶段后用于收敛第三阶段优先分析的 so
+- so used to converge the third stage priority analysis after the second stage
 - `ghidra_target_loader.py`
-  - 第三阶段用于自动导入目标 so 到 Ghidra
+- The third stage is used to automatically import the target .so to Ghidra
 
-换句话说：
-- 前 4 个脚本主要服务本地代码分析
-- 后 2 个脚本主要服务 Native 自动推进
+in other words:
+- The first 4 scripts mainly serve local code analysis
+- The last two scripts mainly serve Native automatic advancement
 
-## 如果要自动导入 Ghidra
-SO 自动化依赖两类材料：
-- 反编译代码上下文，用来判断为什么要分析某个 so
-- APK 解包源码目录，用来从 `lib/<abi>/*.so` 中自动拉取目标 so
+## If you want to automatically import Ghidra
+SO automation relies on two types of materials:
+- Decompiled code context, used to determine why a certain so should be analyzed
+- APK unpacking source code directory, used to automatically pull the target .so from `lib/<abi>/*.so`
 
-如果只有反编译目录，没有 APK 解包源码目录，系统可以收敛候选 so 名称，但不能自动化拉取 so。用户显式提供的 `.so` 可以作为 native 分析材料使用，但不属于“自动化拉取 so”。
+If there is only a decompiled directory and no APK unpacked source code directory, the system can converge on candidate so names, but cannot automatically pull so. `.so` explicitly provided by the user can be used as native analysis material, but does not belong to "automated pulling so".
 
-首次使用前，只需要提前确认一个参数：
+Before first use, you only need to confirm one parameter in advance:
 ```text
 ghidra_root
 ```
-它是你本机 Ghidra 安装根目录，例如：
+It is the root directory of your local Ghidra installation, for example:
 ```text
 sample_tools/Ghidra/ghidra_x.y.z_PUBLIC
 ```
-目前 Ghidra 自动导入暂时只适配 macOS 端，Windows / Linux 下的自动拉起、项目打开和 GUI 行为暂未适配与验证。
+Currently, Ghidra's automatic import is only adapted to macOS. The automatic pull-up, project opening and GUI behavior under Windows/Linux have not yet been adapted and verified.
 
-建议把它写进：
+It is recommended to write it in:
 ```text
 {output_dir}/analysis_state.json
 ```
-其余 Ghidra 项目目录、项目名、so 搜索目录和 ABI 优先级，默认由系统自动推导。
+The rest of the Ghidra project directory, project name, so search directory and ABI priority are automatically derived by the system by default.
 
-## 自动链什么时候会停
-即使你选了 `auto_chain`，系统也不会在缺关键条件时硬往下跑。常见暂停点包括：
-- 抓包材料不存在，且 `burp-mcp` / `yakit-mcp` 不可用
-- 第三阶段需要 Ghidra 自动导入，但 `ghidra_root` 没配置
-- 前序阶段关键结果没生成，例如缺少目标 so 收敛结果
+## When will the automatic chain stop:
+Even if you select `auto_chain`, the system will not forcefully run down when key conditions are missing. Common pause points include:
+- The packet capture material does not exist, and `burp-mcp` / `yakit-mcp` is not available
+- The third stage requires Ghidra to be automatically imported, but `ghidra_root` is not configured
+- The key results in the previous stages are not generated, for example, the target .so convergence result is missing.
 
-这时通常会写状态、提示缺什么，然后停在当前最早阻塞阶段。
+At this time, the status is usually written, prompting what is missing, and then stopping at the earliest blocking stage.
 
-## 最常见的 3 种用法
-用法 1：一步一步来
+## The 3 most common usages
+Usage 1: Step by step
 ```text
 run_mode: step_by_step
 ```
-然后发第一步模板。
+Then send the first step template.
 
-用法 2：前面人工分析，后面自动收口
+Usage 2: Manual analysis at the front, automatic closing at the back
 ```text
 run_mode: auto_chain
 auto_chain_mode: B
 ```
-然后发第一步模板。前 1-3 步人工确认，第四步后自动继续。
+Then send the first step template. The first 1-3 steps are manually confirmed and continue automatically after the fourth step.
 
-用法 3：准备都做完了，尽量自动跑
+Usage 3: All preparations are done, try to run automatically
 ```text
 run_mode: auto_chain
 auto_chain_mode: C
 ```
-然后发第一步模板。系统会从第一步开始尽量连续推进。
+Then send the first step template. The system will try to advance continuously from the first step.
 
-## 卡住了先看哪里
-优先看：
+## If you are stuck, where should you look first:
+Prioritize:
 - `{output_dir}/analysis_state.json`
-- 当前阶段目录下的 JSON / MD 文件
+- JSON/MD file in the current stage directory
 
-如果你需要完整规则，再看：
+If you want the complete rules, look again:
 - `README.md`
 - `SKILL.md`
 - `docs/STATE-MODEL.md`

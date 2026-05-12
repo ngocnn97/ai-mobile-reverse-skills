@@ -1,74 +1,74 @@
-# 移动端逆向与协议分析报告
+# Mobile terminal reverse engineering and protocol analysis report
 
-## 1. 基本信息
+## 1. Basic information
 
-- 目标名称：
-- 样本类型：
-- 样本路径：
-- 分析时间：
-- 分析范围：
-- 分析方式：静态 / 动态 / 流量 / native
+- Target name:
+- Sample type:
+- Sample path:
+- Analysis time:
+- Analysis scope:
+- Analysis method: static / dynamic / traffic / native
 
-## 2. 执行摘要
+## 2. Executive Summary
 
-- 核心结论：
-- 主要风险：
-- 高优先级建议：
+- Core conclusions:
+- Main risks:
+- High priority suggestions:
 
-## 3. 攻击面与入口点
+## 3. Attack surface and entry points
 
-- 登录与认证：
-- 个人信息：
-- 支付与订单：
-- 文件上传下载：
-- WebView / JSBridge：
-- native / so 关键入口：
+- Login and authentication:
+- personal information:
+- Payment and order:
+- File upload and download:
+- WebView / JSBridge:
+- native/so key entry:
 
-## 4. 协议与字段映射
+## 4. Protocol and field mapping
 
-| 接口/场景 | 关键字段 | 代码位置 | 说明 |
+| Interface/scenario | Key fields | Code location | Description |
 |---|---|---|---|
 
-## 5. 关键逻辑分析
+## 5. Key logic analysis
 
-### 5.1 Java / smali 层
+### 5.1 Java/smali layer
 
-### 5.2 native 层
+### 5.2 native layer
 
-### 5.3 流量与行为联动
+### 5.3 Linkage between traffic and behavior
 
-## 6. 风险发现
+## 6. Risk discovery
 
-| ID | 风险 | 严重性 | 置信度 | 位置 | 证据摘要 | 建议 |
+| ID | Risk | Severity | Confidence | Location | Evidence Summary | Recommendation |
 |---|---|---|---|---|---|---|
 
-## 7. 详细证据
+## 7. Detailed evidence
 
 ### R-01
 
-- 类型：
-- 影响：
-- 前置条件：
-- 证据：
-- 代码引用：
-- 需要验证点：
+- type:
+- Influence:
+- Prerequisites:
+- evidence:
+- Code reference:
+- Requires verification points:
 
-## 8. 最小复现与测试计划
+## 8. Minimal Replication and Test Plan
 
-- 正常用例：
-- 边界用例：
-- 异常用例：
-- 观测点：
+- Normal use case:
+- Edge use cases:
+- Exception use cases:
+- Observation point:
 
-## 9. 修复建议
+## 9. Repair suggestions
 
-- 快速修复：
-- 中期改造：
-- 长期治理：
+- Quick fixes:
+- Mid-term renovation:
+- Long-term governance:
 
-## 10. 附录
+## 10. Appendix
 
-- 文件清单：
-- 关键词命中：
-- 工具与版本：
+- Document list:
+- Keyword hits:
+- Tools and versions:
 

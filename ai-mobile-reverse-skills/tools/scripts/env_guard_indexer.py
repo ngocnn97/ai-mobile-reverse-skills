@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Index environment-detection and anti-analysis clues from a decompiled mobile app tree."""
+"""Index environment-detection and anti-analysis leads from a decompiled mobile app tree."""
 
 from __future__ import annotations
 
@@ -143,15 +143,15 @@ COMPILED_RULES = {
 }
 
 BYPASS_HINTS = {
-    "root_detection": "关注 su / Magisk / test-keys / RootBeer 等分支，可在运行时绕过对应检查点。",
-    "emulator_detection": "关注 Build、ro.kernel.qemu、设备型号与硬件信息判断，可在运行时伪造环境特征。",
-    "proxy_or_vpn_detection": "关注代理配置、VPN 接口名和 Burp/Charles 字符串判断，可在运行时屏蔽命中分支。",
-    "ssl_pinning_or_cert_check": "关注 CertificatePinner、TrustManager、HostnameVerifier 实现，可在运行时替换校验逻辑。",
-    "frida_or_debug_detection": "关注 ptrace、TracerPid、maps、frida/xposed 关键字，优先定位检测入口再继续调试。",
-    "signature_check": "关注签名摘要和包信息校验位置，抓包或重打包前需确认是否会触发。",
-    "integrity_or_attestation": "关注 SafetyNet、PlayIntegrity 和 attestation 调用点，后续自动化测试前需确认是否会拦截环境。",
-    "multi_open_detection": "关注双开、虚拟容器、克隆环境判断逻辑，后续测试环境需避免误触发。",
-    "anti_tamper_or_packer": "关注加固、动态加载和类加载链路，结合 Phase 1 的样本画像判断是否存在壳或运行时装载。",
+    "root_detection": "Follow su / Magisk / test-keys / RootBeer and other branches to bypass the corresponding checkpoints at runtime.",
+    "emulator_detection": "Focus on Build, ro.kernel.qemu, device model, and hardware checks; spoof environment traits at runtime.",
+    "proxy_or_vpn_detection": "Review proxy settings, VPN interface names, and Burp/Charles string checks; suppress matching branches at runtime.",
+    "ssl_pinning_or_cert_check": "Review CertificatePinner, TrustManager, and HostnameVerifier implementations; replace verification logic at runtime.",
+    "frida_or_debug_detection": "Review ptrace, TracerPid, maps, and frida/xposed keywords; locate detection entry points before continuing debugging.",
+    "signature_check": "Review signature digest and package-info checks; confirm whether they trigger before packet capture or repackaging.",
+    "integrity_or_attestation": "Review SafetyNet, Play Integrity, and attestation call sites; confirm whether they block the environment before automated testing.",
+    "multi_open_detection": "Review dual-app, virtual container, and cloned-environment checks; avoid false triggers in later test environments.",
+    "anti_tamper_or_packer": "Review hardening, dynamic loading, and class-loader paths; combine this with the Phase 1 sample profile to determine whether a packer or runtime loader is present.",
 }
 
 GUARD_METADATA = {
@@ -160,90 +160,90 @@ GUARD_METADATA = {
         "priority": 90,
         "phase2_blocking": True,
         "hook_strategy": "root_bypass",
-        "impact": "可能阻塞启动、登录、抓包或运行时调试。",
+        "impact": "May block startup, login, packet capture, or runtime debugging.",
     },
     "emulator_detection": {
         "severity": "High",
         "priority": 85,
         "phase2_blocking": True,
         "hook_strategy": "emulator_bypass",
-        "impact": "可能导致测试环境被拒绝或关键流程不可达。",
+        "impact": "May cause the test environment to be rejected or key flows to become unreachable.",
     },
     "proxy_or_vpn_detection": {
         "severity": "High",
         "priority": 88,
         "phase2_blocking": True,
         "hook_strategy": "proxy_bypass",
-        "impact": "可能阻塞代理抓包、Burp/Yakit 联动或联网请求。",
+        "impact": "May block proxy packet capture, Burp/Yakit integration, or network requests.",
     },
     "ssl_pinning_or_cert_check": {
         "severity": "Critical",
         "priority": 95,
         "phase2_blocking": True,
         "hook_strategy": "ssl_pinning_bypass",
-        "impact": "会直接导致 HTTPS 抓包失败或证书不被信任。",
+        "impact": "May directly cause HTTPS packet capture to fail or test certificates to be rejected.",
     },
     "frida_or_debug_detection": {
         "severity": "High",
         "priority": 84,
         "phase2_blocking": True,
         "hook_strategy": "debug_bypass",
-        "impact": "可能阻塞 Frida 注入、调试附加或运行时观测。",
+        "impact": "May block Frida injection, debugger attachment, or runtime observation.",
     },
     "signature_check": {
         "severity": "Medium",
         "priority": 75,
         "phase2_blocking": True,
         "hook_strategy": "manual_signature_review",
-        "impact": "重打包、替换证书或调试改包时可能触发退出或限流。",
+        "impact": "Repackaging, certificate replacement, or debug package modification may trigger app exit or rate limiting.",
     },
     "integrity_or_attestation": {
         "severity": "Medium",
         "priority": 72,
         "phase2_blocking": True,
         "hook_strategy": "manual_attestation_review",
-        "impact": "可能导致登录、风控或关键业务链路被服务端拒绝。",
+        "impact": "May cause login, risk-control, or key business flows to be rejected by the server.",
     },
     "multi_open_detection": {
         "severity": "Medium",
         "priority": 60,
         "phase2_blocking": False,
         "hook_strategy": "manual_multi_open_review",
-        "impact": "多开、平行空间或虚拟容器环境下可能触发限制。",
+        "impact": "Restrictions may be triggered in dual-app, parallel-space, or virtual-container environments.",
     },
     "anti_tamper_or_packer": {
         "severity": "Medium",
         "priority": 70,
         "phase2_blocking": True,
         "hook_strategy": "manual_packer_review",
-        "impact": "可能影响类加载、反编译可见性或运行时插桩稳定性。",
+        "impact": "May affect class loading, decompilation visibility, or runtime instrumentation stability.",
     },
 }
 
 FRIDA_MODULES = {
     "root_bypass": {
         "placeholder": "__ENABLE_ROOT__",
-        "description": "隐藏 su / Magisk / test-keys / Root 包信息与常见命令执行。",
+        "description": "Hide su / Magisk / test-keys / Root package information and common command execution.",
         "guard_types": ["root_detection"],
     },
     "emulator_bypass": {
         "placeholder": "__ENABLE_EMULATOR__",
-        "description": "伪造 Build 与系统属性，降低模拟器环境命中概率。",
+        "description": "Spoof Build values and system properties to reduce emulator-environment detections.",
         "guard_types": ["emulator_detection"],
     },
     "proxy_bypass": {
         "placeholder": "__ENABLE_PROXY__",
-        "description": "隐藏常见 Java 层代理属性，降低代理/抓包环境命中概率。",
+        "description": "Hide common Java-layer proxy attributes and reduce proxy or packet-capture environment detections.",
         "guard_types": ["proxy_or_vpn_detection"],
     },
     "ssl_pinning_bypass": {
         "placeholder": "__ENABLE_SSL__",
-        "description": "替换常见 TrustManager / HostnameVerifier / okhttp3 CertificatePinner 校验。",
+        "description": "Replace common TrustManager / HostnameVerifier / okhttp3 CertificatePinner verification.",
         "guard_types": ["ssl_pinning_or_cert_check"],
     },
     "debug_bypass": {
         "placeholder": "__ENABLE_DEBUG__",
-        "description": "关闭常见 Debug 调试状态检测，降低运行时调试阻塞。",
+        "description": "Disable common debug-state checks and reduce runtime debugging blocks.",
         "guard_types": ["frida_or_debug_detection"],
     },
 }

@@ -104,7 +104,7 @@ def load_json(path: Path) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:  # noqa: BLE001
-        raise RuntimeError(f"无法读取 JSON: {path} ({exc})") from exc
+        raise RuntimeError(f"Cannot read JSON: {path} ({exc})") from exc
 
 
 def find_so_by_name(root: Path, so_name: str) -> Path | None:
@@ -133,7 +133,7 @@ def resolve_so_path(args: argparse.Namespace) -> tuple[Path, dict]:
     if args.so_path:
         so_path = Path(args.so_path).expanduser().resolve()
         if not so_path.is_file():
-            raise RuntimeError(f"指定的 so 文件不存在: {so_path}")
+            raise RuntimeError(f"The specified .so file does not exist: {so_path}")
         resolution_meta["source"] = "direct_so_path"
         return so_path, resolution_meta
 
@@ -146,11 +146,11 @@ def resolve_so_path(args: argparse.Namespace) -> tuple[Path, dict]:
         elif legacy_selected.is_file():
             args.selected_target_json = str(legacy_selected)
         else:
-            raise RuntimeError("缺少 so 目标。请提供 --so-path 或 --selected-target-json。")
+            raise RuntimeError("Missing .so target. Please provide --so-path or --selected-target-json.")
 
     selected_json = Path(args.selected_target_json).expanduser().resolve()
     if not selected_json.is_file():
-        raise RuntimeError(f"selected target JSON 不存在: {selected_json}")
+        raise RuntimeError(f"selected target JSON does not exist: {selected_json}")
 
     data = load_json(selected_json)
     resolution_meta["source"] = "selected_target_json"
@@ -189,8 +189,8 @@ def resolve_so_path(args: argparse.Namespace) -> tuple[Path, dict]:
                 return by_name.resolve(), resolution_meta
 
     raise RuntimeError(
-        "无法从 selected target JSON 解析 so 文件路径。"
-        "请补充 --target-dir，或在 JSON 中提供 selected_so_path。"
+        "Unable to parse .so file path from selected target JSON."
+        "Please supplement --target-dir, or provide selected_so_path in JSON."
     )
 
 
@@ -214,7 +214,8 @@ def normalize_ghidra_root(raw: str | None) -> Path:
             return candidate / "Contents" / "MacOS"
 
     raise RuntimeError(
-        "无法定位 Ghidra 安装目录。请通过 --ghidra-root 或 GHIDRA_INSTALL_DIR 提供路径。"
+        "Unable to locate the Ghidra installation directory. "
+        "Please provide the path via --ghidra-root or GHIDRA_INSTALL_DIR."
     )
 
 
@@ -222,9 +223,9 @@ def ghidra_binaries(ghidra_root: Path) -> tuple[Path, Path]:
     ghidra_run = ghidra_root / "ghidraRun"
     analyze_headless = ghidra_root / "support" / "analyzeHeadless"
     if not ghidra_run.exists():
-        raise RuntimeError(f"找不到 ghidraRun: {ghidra_run}")
+        raise RuntimeError(f"ghidraRun not found: {ghidra_run}")
     if not analyze_headless.exists():
-        raise RuntimeError(f"找不到 analyzeHeadless: {analyze_headless}")
+        raise RuntimeError(f"cannot find analyzeHeadless: {analyze_headless}")
     return ghidra_run, analyze_headless
 
 
